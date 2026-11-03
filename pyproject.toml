@@ -1,0 +1,26 @@
+[project]
+name = "reader-quest"
+version = "0.1.0"
+description = "Тренажёр подготовки к собеседованиям по Python"
+readme = "README.md"
+authors = [
+    { name = "Leonid Stoyko", email = "gribojor@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "markdown>=3.11.2",
+    "pygments>=2.21.0",
+    "streamlit>=1.66.1",
+]
+
+[project.scripts]
+reader-quest = "reader_quest.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Локальный прогресс приложения
+.reader_quest/
+
+# Сгенерированный статичный HTML (пересоздаётся командой reader-quest build)
+Python_Developer_Questions.html
