@@ -11,7 +11,8 @@
 from __future__ import annotations
 
 import re
-from typing import Callable, Final
+from collections.abc import Callable
+from typing import Final
 
 _KEYWORDS: Final = (
     "def class lambda return yield import from with as pass break continue "
@@ -124,11 +125,13 @@ _TERM_RE: Final = re.compile(
 _PROTECTED: Final = re.compile(r"(`[^`\n]*`)|(!?\[[^\]\n]*\]\([^)\n]*\))")
 
 # Токены, которые выглядят как код, но не входят в словарь: *args, __dict__, globals()
+# Финальный lookahead запрещает и `*`: иначе `**GIL**` распадалось бы как
+# «звёздочки + идентификатор» и жирный markdown превращался в `` `**GIL`** ``.
 _CODE_TOKEN: Final = re.compile(
     r"(?<![\w`*])"
     r"(?:__[A-Za-z_][A-Za-z0-9_]*__"
     r"|\*{1,2}[A-Za-z_][A-Za-z0-9_]*"
-    r"|\b[A-Za-z_][A-Za-z0-9_]*\(\))(?![\w`])"
+    r"|\b[A-Za-z_][A-Za-z0-9_]*\(\))(?![\w`*])"
 )
 
 
@@ -169,7 +172,11 @@ def _color_terms(text: str, render: Callable[[str, str], str]) -> str:
     return "".join(parts)
 
 
-def _transform_prose(text: str, render, code_wrap) -> str:
+def _transform_prose(
+    text: str,
+    render: Callable[[str, str], str],
+    code_wrap: Callable[[str], str],
+) -> str:
     wrapped = _CODE_TOKEN.sub(lambda m: code_wrap(m.group(0)), text)
     out: list[str] = []
     for protected, chunk in _protect_runs(wrapped):

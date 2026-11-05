@@ -54,10 +54,13 @@ uv run python highlight.py --help # другие варианты
 | `.streamlit/config.toml` | тема One Dark Pro                                          |
 | `tests/`                 | pytest + Streamlit AppTest                                 |
 
-## Тесты
+## Проверки
 
 ```bash
-uv run pytest -q
+uv sync               # зависимости вместе с dev-группой (pytest, ruff, mypy)
+uv run pytest -q      # тесты ядра + Streamlit AppTest
+uv run ruff check .   # линтер
+uv run mypy           # типы (strict для src, app.py, app_pages, highlight.py)
 ```
 
 ## Источник данных
@@ -65,5 +68,3 @@ uv run pytest -q
 Файл `Python_Developer_Questions.md` — подборка «400+ вопросов с ответами,
 которые должен знать Python-разработчик» (автор подборки —
 [DEBAGanov](https://github.com/DEBAGanov)).
-
-Remove-Item "400 вопросов с ответами, которые должен знать Python-разработчик.md"

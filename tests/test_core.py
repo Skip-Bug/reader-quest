@@ -41,6 +41,19 @@ def test_save_is_atomic(tmp_path):
     assert leftovers == []
 
 
+def test_progress_reset():
+    """Сброс отметки возвращает вопрос в статус «новый» (используется
+    кнопкой «Сбросить отметку» и диалогом полного сброса)."""
+
+    progress = Progress(marks={"a": "known", "b": "review"})
+    progress.reset("a")
+    assert progress.status("a") == "new"
+    assert "a" not in progress.marks
+    assert progress.status("b") == "review"
+    progress.reset("нет-такого-ключа")  # не падает
+    assert progress.counts(["a", "b"]) == {"new": 1, "known": 0, "review": 1}
+
+
 def test_filter_by_search_and_topics():
     questions = [
         _question(1, "Что такое GIL?", "a"),

@@ -166,9 +166,9 @@ def _looks_like_orphan_question(lines: list[str], index: int, title: str) -> boo
         return False
     if _PLAIN_HEADER.match(previous) or _HEADER.match(previous):
         return False
-    if following and (_PLAIN_HEADER.match(following) or _HEADER.match(following)):
-        return False
-    return True
+    if not following:
+        return True
+    return not (_PLAIN_HEADER.match(following) or _HEADER.match(following))
 
 
 def parse_questions(text: str) -> list[Question]:

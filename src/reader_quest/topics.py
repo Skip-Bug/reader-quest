@@ -106,6 +106,7 @@ def classify(title: str, body: str = "") -> tuple[str, ...]:
     return tuple(name for name, _ in hits[:2])
 
 
-ALL_TOPICS: Final[tuple[str, ...]] = tuple(name for name, _ in TOPIC_RULES) + (
+ALL_TOPICS: Final[tuple[str, ...]] = (
+    *(name for name, _ in TOPIC_RULES),
     FALLBACK_TOPIC,
 )

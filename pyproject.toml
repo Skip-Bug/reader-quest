@@ -22,5 +22,46 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "mypy>=2.4.1",
     "pytest>=9.2.0",
+    "ruff>=0.17.3",
+    "types-markdown>=3.11.2.20261029",
+    "types-pygments>=2.21.0.20260819",
 ]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "RUF", # ruff-specific
+]
+# Проект русскоязычный: кириллица в докстрингах и комментариях — не «похожий на
+# латиницу символ», а осознанный выбор.
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+# CSS/JS-шаблоны и таблицы терминов: перенос строк испортит содержимое.
+"src/reader_quest/html_export.py" = ["E501"]
+"src/reader_quest/topics.py" = ["E501"]
+"tests/*" = ["E501"]
+# Словарь терминов компактнее хранить одной строкой и резать по пробелам.
+"src/reader_quest/terms.py" = ["SIM905"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["src", "app.py", "app_pages", "highlight.py"]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false

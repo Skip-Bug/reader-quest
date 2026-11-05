@@ -32,20 +32,20 @@ class Question:
     def has_code(self) -> bool:
         return any(b.kind == "code" for b in self.blocks)
 
-    @property
-    def words(self) -> int:
-        return len(self.body.split())
-
 
 @dataclass
 class Progress:
     """Отметки пользователя о знании вопросов, ключ — Question.key."""
 
-    marks: dict[str, str] = field(default_factory=dict)
+    marks: dict[str, Status] = field(default_factory=dict)
 
     def status(self, key: str) -> Status:
-        value = self.marks.get(key)
-        return value if value in ("known", "review") else "new"
+        return self.marks.get(key, "new")
+
+    def reset(self, key: str) -> None:
+        """Снимает отметку с вопроса, возвращая его в статус «новый»."""
+
+        self.marks.pop(key, None)
 
     def counts(self, keys: list[str] | None = None) -> dict[str, int]:
         result = {"new": 0, "known": 0, "review": 0}

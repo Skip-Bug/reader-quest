@@ -46,6 +46,17 @@ def test_star_args_and_dunder_become_inline_code():
     assert "`__dict__`" in highlight_markdown("Атрибут __dict__ объекта")
 
 
+def test_bold_markup_is_not_mangled_into_code():
+    """Регрессия: `**GIL**` распадалось как «звёзды + идентификатор», и
+    жирный markdown превращался в `` `**GIL`** ``."""
+
+    assert highlight_markdown("Про **GIL** все слышали") == (
+        "Про **:yellow[GIL]** все слышали"
+    )
+    assert highlight_markdown("**важный** абзац") == "**важный** абзац"
+    assert "`" not in highlight_markdown("Текст со *курсивом* внутри")
+
+
 def test_html_version_uses_css_classes():
     result = highlight_html("Ключевое слово class и тип dict")
     assert '<span class="term-keyword">class</span>' in result

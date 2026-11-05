@@ -7,7 +7,6 @@ import random
 import streamlit as st
 
 from reader_quest.app_helpers import empty_state, go_to, mark_and_save, question_by_key
-from reader_quest.models import Status
 from reader_quest.render import render_blocks
 
 st.header(":material/quiz: Экзамен", anchor=False)
@@ -102,7 +101,10 @@ if not st.session_state.revealed:
     st.stop()
 
 if not question.body:
-    st.warning("В исходном файле у этого вопроса нет текста ответа.", title="Ответа нет")
+    st.warning(
+        "В исходном файле у этого вопроса нет текста ответа.",
+        title="Ответа нет",
+    )
 else:
     with st.container(border=True):
         render_blocks(question.blocks)

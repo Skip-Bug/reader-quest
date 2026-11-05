@@ -12,5 +12,8 @@ wheels/
 # Локальный прогресс приложения
 .reader_quest/
 
-# Сгенерированный статичный HTML (пересоздаётся командой reader-quest build)
+# Сгенерированные файлы (пересоздаются командами reader-quest build / highlight.py)
 Python_Developer_Questions.html
+Python_Developer_Questions_Highlighted.md
+.pytest_cache/
+.gigacode_vsc

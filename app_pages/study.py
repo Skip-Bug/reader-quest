@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from reader_quest.app_helpers import (
+    clear_and_save,
     ensure_revealed_reset,
     go_to,
     mark_and_save,
@@ -37,14 +38,14 @@ with st.container(horizontal=True):
         ":material/chevron_left: Назад",
         disabled=prev_key is None,
         on_click=go_to,
-        args=(prev_key or current,),
+        args=(prev_key,),
         width="content",
     )
     st.button(
         "Вперёд :material/chevron_right:",
         disabled=next_key is None,
         on_click=go_to,
-        args=(next_key or current,),
+        args=(next_key,),
         width="content",
     )
     st.caption(f"**{position}** из {len(keys)}", width="stretch")
@@ -82,6 +83,8 @@ with st.container(horizontal=True, horizontal_alignment="distribute"):
         help="Отметить «знаю» и перейти к следующему вопросу",
     ):
         mark_and_save(question, "known")
+        # На последнем вопросе next_key нет, но перезапуск нужен, чтобы
+        # обновились счётчик в сайдбаре и кнопки отметок.
         go_to(next_key or current)
     if st.button(
         ":material/replay: Повторить",
@@ -96,12 +99,5 @@ with st.container(horizontal=True, horizontal_alignment="distribute"):
         disabled=st.session_state.progress.status(question.key) == "new",
         help="Убрать отметку у этого вопроса",
     ):
-        st.session_state.progress.marks.pop(question.key, None)
-        from reader_quest.progress import save as save_progress
-
-        save_progress(
-            st.session_state.progress_path,
-            st.session_state.progress,
-            st.session_state.source_name,
-        )
+        clear_and_save(question)
         st.rerun()

@@ -32,6 +32,22 @@ def sync_question() -> None:
     st.session_state.revealed = False
 
 
+@st.dialog("Сбросить все отметки?", icon=":material/delete:")
+def confirm_reset(source: str, total: int) -> None:
+    """Диалог подтверждения: сброс удаляет отметки без возможности отменить."""
+
+    st.write(
+        f"Будут удалены все отметки «Знал» и «Повторить» у {total} вопросов "
+        f"из файла `{source}`. Отменить это нельзя."
+    )
+    with st.container(horizontal=True, horizontal_alignment="distribute"):
+        st.button("Отмена", on_click=st.rerun, width="content")
+        if st.button("Да, сбросить", type="primary", width="content"):
+            st.session_state.progress = Progress()
+            save(st.session_state.progress_path, st.session_state.progress, source)
+            st.rerun()
+
+
 def file_fingerprints() -> tuple[tuple[str, float], ...]:
     """mtime-отпечатки md-файлов: участвуют в ключе кэша, чтобы приложение
     перечитало данные после изменения файлов."""
@@ -162,19 +178,16 @@ with st.sidebar:
             on_change=sync_question,
         )
 
-    if st.button(":material/shuffle: Случайный вопрос", width="stretch"):
-        if keys:
-            st.session_state.question = random.choice(keys)
-            st.session_state.revealed = False
-            st.rerun()
+    if st.button(":material/shuffle: Случайный вопрос", width="stretch") and keys:
+        st.session_state.question = random.choice(keys)
+        st.session_state.revealed = False
+        st.rerun()
 
     with st.expander(":material/settings: Прогресс и файлы"):
         st.caption(f"Отметки: `{st.session_state.progress_path}`")
         st.json(st.session_state.progress.counts(), expanded=False)
         if st.button(":material/delete: Сбросить отметки", width="stretch"):
-            st.session_state.progress = Progress()
-            save(st.session_state.progress_path, st.session_state.progress, source)
-            st.rerun()
+            confirm_reset(source, total)
 
 # --- Общие данные для страниц --------------------------------------------------
 st.session_state.questions = questions

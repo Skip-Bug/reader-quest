@@ -7,18 +7,21 @@
 from __future__ import annotations
 
 import html
-from datetime import datetime, timezone
+from collections.abc import Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 
 import markdown as md_lib
 from pygments import highlight as pyg_highlight
 from pygments.formatters import HtmlFormatter
+from pygments.lexer import Lexer
 from pygments.lexers import BashLexer, CppLexer, JavaLexer, PythonLexer, TextLexer
 
+from .models import Question
 from .parser import parse_questions
 from .terms import highlight_html
 
-_CODE_LEXERS = {
+_CODE_LEXERS: dict[str, type[Lexer]] = {
     "py": PythonLexer,
     "python": PythonLexer,
     "py3": PythonLexer,
@@ -224,9 +227,9 @@ _JS = """
 _MD_EXTENSIONS = ["fenced_code", "tables", "sane_lists"]
 
 
-def _lexer(language: str):
+def _lexer(language: str) -> Lexer:
     name = (language or "").strip().lower()
-    return _CODE_LEXERS.get(name, TextLexer)()
+    return _CODE_LEXERS.get(name, TextLexer)()  # type: ignore[no-any-return]
 
 
 def _render_code(block_text: str, language: str) -> str:
@@ -242,6 +245,7 @@ def export_html(
     source: str,
     base_dir: Path | None = None,
     output: Path | None = None,
+    questions: Sequence[Question] | None = None,
 ) -> Path:
     """Генерирует автономный HTML-файл и возвращает путь к нему."""
 
@@ -250,12 +254,13 @@ def export_html(
     if not source_path.exists():
         raise FileNotFoundError(f"Не найден файл с вопросами: {source_path}")
 
-    questions = parse_questions(source_path.read_text(encoding="utf-8"))
+    if questions is None:
+        questions = parse_questions(source_path.read_text(encoding="utf-8"))
     if output is None:
         output = base / "Python_Developer_Questions.html"
 
     pygments_css = HtmlFormatter(style="one-dark", classprefix="pg-").get_style_defs(
-        ".codehilite"
+        ".codehilite"  # type: ignore[no-untyped-call]
     )
 
     cards: list[str] = []
@@ -294,7 +299,7 @@ def export_html(
             f"{question.num}. {title}</a></li>"
         )
 
-    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    generated = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     document = f"""<!doctype html>
 <html lang="ru">
 <head>

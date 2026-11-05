@@ -5,18 +5,18 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, cast
 
-from .models import Progress
+from .models import Progress, Status
 
 DEFAULT_DIR: Final[str] = ".reader_quest"
 DEFAULT_FILE: Final[str] = "progress.json"
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def default_path(root: Path | str | None = None) -> Path:
@@ -37,7 +37,8 @@ def load(path: Path | str) -> Progress:
     marks = raw.get("marks") if isinstance(raw, dict) else None
     if not isinstance(marks, dict):
         return Progress()
-    return Progress(marks={k: v for k, v in marks.items() if v in ("known", "review")})
+    cleaned = {k: v for k, v in marks.items() if v in ("known", "review")}
+    return Progress(marks=cast(dict[str, Status], cleaned))
 
 
 def save(path: Path | str, progress: Progress, source: str = "") -> Path:
@@ -51,7 +52,7 @@ def save(path: Path | str, progress: Progress, source: str = "") -> Path:
         "source": source,
         "marks": dict(sorted(progress.marks.items())),
     }
-    handle = tempfile.NamedTemporaryFile(
+    handle = tempfile.NamedTemporaryFile(  # noqa: SIM115
         "w",
         encoding="utf-8",
         dir=file.parent,

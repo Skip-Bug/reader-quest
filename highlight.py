@@ -15,9 +15,12 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 from reader_quest.html_export import export_html
+from reader_quest.models import Question
+from reader_quest.parser import parse_questions
 from reader_quest.terms import highlight_html
 
 DEFAULT_SOURCE = "Python_Developer_Questions.md"
@@ -25,11 +28,10 @@ DEFAULT_HTML = "Python_Developer_Questions.html"
 DEFAULT_MD = "Python_Developer_Questions_Highlighted.md"
 
 
-def build_highlighted_md(source: Path, output: Path) -> int:
+def build_highlighted_md(questions: Sequence[Question], output: Path) -> int:
     """Markdown-версия: исходный текст с <span>-подсветкой терминов."""
 
-    questions = _load_questions(source)
-    parts = []
+    parts: list[str] = []
     for question in questions:
         parts.append(f"## {question.num}. {question.title}\n")
         if question.body:
@@ -39,9 +41,7 @@ def build_highlighted_md(source: Path, output: Path) -> int:
     return len(questions)
 
 
-def _load_questions(source: Path):
-    from reader_quest.parser import parse_questions
-
+def _load_questions(source: Path) -> list[Question]:
     return parse_questions(source.read_text(encoding="utf-8"))
 
 
@@ -76,12 +76,13 @@ def main(argv: list[str] | None = None) -> int:
         source.name,
         base_dir=source.parent,
         output=source.parent / args.output_html,
+        questions=questions,
     )
     print(f"HTML готов: {html_path}")
 
     if args.md:
         md_output = source.parent / args.output_md
-        build_highlighted_md(source, md_output)
+        build_highlighted_md(questions, md_output)
         print(f"Markdown готов: {md_output}")
 
     return 0

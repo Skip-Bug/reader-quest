@@ -19,8 +19,8 @@ from .topics import ALL_TOPICS, classify
 
 __all__ = [
     "ALL_TOPICS",
-    "Block",
     "GROUPS",
+    "Block",
     "Progress",
     "Question",
     "Status",

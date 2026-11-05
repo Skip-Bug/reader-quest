@@ -8,9 +8,15 @@ from .models import Progress, Question, Status
 from .progress import save as save_progress
 
 
-def go_to(key: str, *, reset_answer: bool = True) -> None:
-    """Переключает текущий вопрос и перезапускает приложение."""
+def go_to(key: str | None, *, reset_answer: bool = True) -> None:
+    """Переключает текущий вопрос и перезапускает приложение.
 
+    ``None`` (край выборки) игнорируется: вызов из обработчика кнопки,
+    которая на краях недоступна.
+    """
+
+    if key is None:
+        return
     st.session_state.question = key
     if reset_answer:
         st.session_state.revealed = False
@@ -18,15 +24,21 @@ def go_to(key: str, *, reset_answer: bool = True) -> None:
 
 
 def neighbors(keys: list[str], key: str) -> tuple[str | None, str | None]:
-    """Соседние ключи в списке: (предыдущий, следующий) с зацикливанием."""
+    """Соседние ключи в списке: (предыдущий, следующий).
+
+    Без зацикливания: на краях выборки возвращается ``None``, поэтому
+    кнопки «Назад»/«Вперёд» можно честно отключать.
+    """
 
     if not keys:
         return None, None
     try:
         index = keys.index(key)
     except ValueError:
-        return keys[-1], keys[0]
-    return keys[index - 1], keys[(index + 1) % len(keys)]
+        return None, keys[0]
+    prev_key = keys[index - 1] if index > 0 else None
+    next_key = keys[index + 1] if index + 1 < len(keys) else None
+    return prev_key, next_key
 
 
 def mark_and_save(question: Question, status: Status) -> None:
@@ -34,6 +46,16 @@ def mark_and_save(question: Question, status: Status) -> None:
 
     progress: Progress = st.session_state.progress
     progress.marks[question.key] = status
+    save_progress(
+        st.session_state.progress_path, progress, st.session_state.source_name
+    )
+
+
+def clear_and_save(question: Question) -> None:
+    """Снимает отметку и сразу пишет прогресс на диск."""
+
+    progress: Progress = st.session_state.progress
+    progress.reset(question.key)
     save_progress(
         st.session_state.progress_path, progress, st.session_state.source_name
     )
@@ -49,7 +71,8 @@ def ensure_revealed_reset(question_key: str) -> None:
 
 
 def question_by_key(key: str) -> Question | None:
-    for question in st.session_state.questions:
+    questions: list[Question] = st.session_state.questions
+    for question in questions:
         if question.key == key:
             return question
     return None

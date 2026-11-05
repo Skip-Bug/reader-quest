@@ -30,7 +30,7 @@ def _content_id(questions: Sequence[Question]) -> str:
     digest = hashlib.sha1()
     for question in questions:
         digest.update(
-            f"{question.num}\x00{question.title}\x00{question.body}".encode("utf-8")
+            f"{question.num}\x00{question.title}\x00{question.body}".encode()
         )
     return digest.hexdigest()
 
