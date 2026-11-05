@@ -28,9 +28,7 @@ def main(argv: list[str] | None = None) -> int:
         prog="reader-quest",
         description="Тренажёр подготовки к собеседованиям по Python.",
     )
-    parser.add_argument(
-        "command", nargs="?", choices=("run", "build"), default="run"
-    )
+    parser.add_argument("command", nargs="?", choices=("run", "build"), default="run")
     args = parser.parse_args(argv)
 
     root = _root()
@@ -45,7 +43,15 @@ def main(argv: list[str] | None = None) -> int:
             cwd=root,
         )
 
-    output = export_html(DEFAULT_SOURCE, base_dir=root)
+    try:
+        output = export_html(DEFAULT_SOURCE, base_dir=root)
+    except FileNotFoundError:
+        print(
+            f"Не найден файл с вопросами: {root / DEFAULT_SOURCE}\n"
+            "Положите Markdown с заголовками вида `## 1. Вопрос` рядом с app.py.",
+            file=sys.stderr,
+        )
+        return 1
     print(f"HTML готов: {output}")
     return 0
 

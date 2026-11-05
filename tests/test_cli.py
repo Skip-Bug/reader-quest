@@ -61,6 +61,21 @@ def test_cli_without_app_returns_error(
     assert cli.main(["run"]) == 1
 
 
+def test_cli_build_without_source_explains(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    """Без файла с вопросами — понятное сообщение, а не трейсбек: именно этот
+    сценарий видит человек, который переименовал или удалил источник."""
+
+    (tmp_path / "app.py").write_text("", encoding="utf-8")
+    monkeypatch.setattr(cli, "_root", lambda: tmp_path)
+
+    assert cli.main(["build"]) == 1
+    err = capsys.readouterr().err
+    assert "Не найден файл с вопросами" in err
+    assert "## 1. Вопрос" in err
+
+
 def test_highlight_main_builds_html_and_md(
     tmp_path: Path, source: Path, capsys
 ) -> None:
