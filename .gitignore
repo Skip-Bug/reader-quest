@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Symlink на скилл внутри .venv: у другого человека путь битый
+.agents/
+
 # Локальный прогресс приложения
 .reader_quest/
 
@@ -17,3 +20,6 @@ Python_Developer_Questions.html
 Python_Developer_Questions_Highlighted.md
 .pytest_cache/
 .gigacode_vsc
+.ruff_cache/
+.mypy_cache/
+report.md
